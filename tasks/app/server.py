@@ -1,20 +1,23 @@
-import socket
+from Socket import Socket
+import json
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # CREACION DEL SOCKET
-server_socket.bind(('0.0.0.0', 5000)) # ASIGNARLE UN HOST Y PORT AL SOCKET DEL SERVER (desde donde le llegaran señales, (EL PUERTO MAYOR A 1024))
+server_socket = Socket.socketServer("0.0.0.0", 5000)
 server_socket.listen(10) # CAPACIDAD DE CLIENTES EN COLA (deja en espera la entrada de clientes)
 
 print(f"Server en espera en {"0.0.0.0"}:{5000}")
+cliente_socket, direction = Socket.socketAccept(server_socket)
 
+while True:
+    message = Socket.msgRcv(cliente_socket)
+    json_cliente = json.loads(message)
 
-conexion, direccion = server_socket.accept() # ACEPTA LA CONEXION ENTRANTE Y GUARDA LOS DATOS DEL CLIENTE EN UNA TUPLA CON (conexion, direccion)
+    print(f"Dato ingresado de: {json_cliente["nombre"]}")
+    print(f"Mensaje: {json_cliente["mensaje"]}")
 
-print(f"Cliente se conecto: ({conexion}, {direccion})")
+    eco = f"Nombre: {json_cliente["nombre"]} \nID: {json_cliente["id"]} \nEstado: {json_cliente["estado"]}"
+    Socket.msgSend(cliente_socket, eco)
 
-mensaje = "Hola nuevo cliente, el server te da la bienvenida"
-conexion.send(mensaje.encode("utf-8"))
-
-
-# CERRAR LAS CONEXIONES
-conexion.close()
-server_socket.close()
+    # CERRAR LAS CONEXIONES
+    # cliente.close()
+    # server_socket.close()
+    # print("Se cerro la conexion del server")
