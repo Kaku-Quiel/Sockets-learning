@@ -1,5 +1,4 @@
 import socket
-import json
 
 class Socket:
     @staticmethod

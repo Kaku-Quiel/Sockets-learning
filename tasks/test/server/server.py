@@ -1,23 +1,47 @@
-from ..config.Socket import Socket
-import json
+import sys
+import os
 
-server_socket = Socket.socketServer("0.0.0.0", 5000)
-server_socket.listen(10) # CAPACIDAD DE CLIENTES EN COLA (deja en espera la entrada de clientes)
+# Obtener la ruta absoluta del directorio raíz
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, root_dir)
 
-print(f"Server en espera en {"0.0.0.0"}:{5000}")
-cliente_socket, direction = Socket.socketAccept(server_socket)
+from config.Socket import Socket
+from Operators import Operators
+
+server = Socket.socketServer()
+server.listen(1) # CAPACIDAD DE CLIENTES EN COLA (deja en espera la entrada de clientes)
+
+print(f"Server en espera en {"127.0.0.1"}:{5000}")
+cliente, direction = Socket.socketAccept(server)
 
 while True:
-    message = Socket.msgRcv(cliente_socket)
-    json_cliente = json.loads(message)
+    message = Socket.msgRcv(cliente)
+    operation = message.split()
+    
 
-    print(f"Dato ingresado de: {json_cliente["nombre"]}")
-    print(f"Mensaje: {json_cliente["mensaje"]}")
+    if message.lower() == "salir":
+        server.close()
+        cliente.close()
+        print(f"Saliendo...")
+        break
+    
+    if len(operation) != 3:
+        print(f"Error: Operacion no valida, solo dos parametros porfavor")
+        continue
 
-    eco = f"Nombre: {json_cliente["nombre"]} \nID: {json_cliente["id"]} \nEstado: {json_cliente["estado"]}"
-    Socket.msgSend(cliente_socket, eco)
 
-    # CERRAR LAS CONEXIONES
-    # cliente.close()
-    # server_socket.close()
-    # print("Se cerro la conexion del server")
+    num1, operator, num2 = operation
+    print(f"data in: {operation}")
+
+    try:
+        num1 = float(num1)
+        num2 = float(num2)
+
+        resultado = Operators.doMath(num1, num2, operator)
+
+        Socket.msgSend(cliente, f"{resultado}")
+        print(f"data out: {resultado}")
+
+    except Exception as e:
+        Socket.msgSend(cliente, f"Error: {e}")
+        print(f"data out: Error: {e}")

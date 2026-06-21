@@ -1,26 +1,36 @@
-from ..config.Socket import Socket
-import json
+import sys
+import os
 
-cliente_socket = Socket.socketClient()
-cliente_socket.connect(("127.0.0.1", 5000)) # INTENTA CONECTARSE A DESDE LOCALHOST EN EL PUERTO 5000
+# Obtener la ruta absoluta del directorio raíz
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, root_dir)
 
-cliente = {
-    "nombre" : "Jeremy",
-    "id" : 1,
-    "estado": True,
-    "mensaje": ""
-}
+import subprocess
+from config.Socket import Socket
+from Validate import Validate
+
+subprocess.run(["clear"])
+
+cliente = Socket.socketClient()
+cliente.connect(("127.0.0.1", 5000))
+
 
 while True:
-    mss = input("Mensaje: ")
-    cliente["mensaje"] = mss
-    cliente_string = json.dumps(cliente)
+    operacion = input(f"Ingrese una operacion: ")
 
-    Socket.msgSend(cliente_socket, cliente_string)
+    if operacion.lower() == "salir":
+        Socket.msgSend(cliente, operacion)
+        cliente.close()
+        print(f"Saliendo del programa")
+        break
+    
+    data = Validate.isValid(operacion)
 
-    mensaje = Socket.msgRcv(cliente_socket)
+    if not data["codigo"]:
+        print(f"{data["message"]}\n")
 
-    print(f"Mensaje del server: \n{mensaje}")
+    else:
+        Socket.msgSend(cliente, operacion)
 
-    # cliente_socket.close()
-    # print("Se cerro la conexino del cliente")
+        resultado = Socket.msgRcv(cliente);
+        print(f"Resultado: {resultado}\n")
