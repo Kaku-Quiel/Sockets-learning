@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manejo de Archivos en Python — Guía Completa con Ejemplos</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-hover: #1c2333;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-secondary: #b0b8c4;
+            --accent: #58a6ff;
+            --accent2: #79c0ff;
+            --green: #3fb950;
+            --orange: #d2991d;
+            --red: #f85149;
+            --purple: #a371f7;
+            --pink: #f778ba;
+            --teal: #39d353;
+            --code-bg: #0d1117;
+            --inline-code: #1c2333;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Colores de sintaxis Python */
+            --syn-keyword: #ff7b72;
+            --syn-function: #d2a8ff;
+            --syn-string: #a5d6ff;
+            --syn-comment: #8b949e;
+            --syn-number: #79c0ff;
+            --syn-builtin: #ffa657;
+            --syn-class: #ffa657;
+            --syn-decorator: #d2a8ff;
+            --syn-operator: #ff7b72;
+            --syn-variable: #e6edf3;
+            --syn-self: #ff7b72;
+            --syn-bool: #79c0ff;
+            --syn-import: #ff7b72;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5a6370;
+        }
+
+        header {
+            background: linear-gradient(180deg, #1a1f2e 0%, var(--surface) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 2.5rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(88, 166, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        header .icon-task {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--accent2), var(--teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 0.4rem;
+            position: relative;
+            z-index: 1;
+        }
+        header .badge-row {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .badge {
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.35rem 0.9rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: var(--transition);
+        }
+        .badge:hover {
+            border-color: var(--accent);
+            color: var(--accent2);
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.6rem 2rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            transition: var(--transition);
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+        nav a:hover,
+        nav a.active {
+            color: #fff;
+            background: var(--surface-hover);
+            border-color: var(--border);
+        }
+        nav a .nav-emoji {
+            margin-right: 0.3rem;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        section {
+            margin-bottom: 2.5rem;
+            scroll-margin-top: 80px;
+        }
+        section h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        section .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
+            border-left: 3px solid var(--accent);
+            padding-left: 0.8rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+        .card:hover {
+            border-color: #4a5568;
+        }
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+        .card ul,
+        .card ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .card ul li,
+        .card ol li {
+            padding: 0.3rem 0;
+        }
+        .card ul li::marker {
+            color: var(--accent);
+        }
+        .card ol li::marker {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .code-block-wrapper {
+            margin: 1rem 0 1.5rem;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #0a0e14;
+        }
+        .code-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1a1f2b;
+            border-bottom: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #8b949e;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .code-label .lang-dot {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .code-label .lang-dot::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f1e05a;
+            box-shadow: 0 0 6px rgba(241, 224, 90, 0.4);
+        }
+        pre {
+            margin: 0;
+            padding: 1.2rem 1.2rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+            font-size: 0.84rem;
+            line-height: 1.75;
+            background: #0a0e14;
+        }
+        pre code {
+            color: #e6edf3;
+            display: block;
+        }
+
+        /* Resaltado de sintaxis Python - Colores reales */
+        .hljs-keyword {
+            color: #ff7b72;
+            font-weight: 500;
+        }
+        .hljs-builtin {
+            color: #ffa657;
+        }
+        .hljs-string {
+            color: #a5d6ff;
+        }
+        .hljs-comment {
+            color: #8b949e;
+            font-style: italic;
+        }
+        .hljs-number {
+            color: #79c0ff;
+        }
+        .hljs-function {
+            color: #d2a8ff;
+        }
+        .hljs-operator {
+            color: #ff7b72;
+        }
+        .hljs-punctuation {
+            color: #e6edf3;
+        }
+        .hljs-bool {
+            color: #79c0ff;
+        }
+        .hljs-variable {
+            color: #ffa657;
+        }
+        .hljs-params {
+            color: #e6edf3;
+        }
+
+        .tip-box {
+            background: #1a2332;
+            border-left: 4px solid var(--accent);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.9rem 1.2rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: #c9d8e8;
+        }
+        .tip-box.warning {
+            border-left-color: var(--orange);
+            background: #1f1a14;
+        }
+        .tip-box.success {
+            border-left-color: var(--green);
+            background: #121f18;
+        }
+        .tip-box.info {
+            border-left-color: var(--purple);
+            background: #19162b;
+        }
+        .tip-box strong {
+            color: var(--accent2);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.6rem 0.9rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        .comparison-table th {
+            background: var(--surface-hover);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+        }
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+        .comparison-table code {
+            background: var(--inline-code);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            color: var(--accent2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+        footer span {
+            color: var(--accent2);
+        }
+        footer code {
+            background: var(--inline-code);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            color: var(--syn-builtin);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+            header {
+                padding: 1.5rem 1rem 1.2rem;
+            }
+            nav {
+                padding: 0.4rem 0.6rem;
+                gap: 0.2rem;
+            }
+            nav a {
+                font-size: 0.72rem;
+                padding: 0.3rem 0.5rem;
+            }
+            .container {
+                padding: 1rem 0.8rem 2rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            pre {
+                font-size: 0.72rem;
+                padding: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="icon-task">📂</span>
+        <h1>Manejo de Archivos en Python</h1>
+        <p>Guía práctica con ejemplos comentados · Lectura, escritura y más</p>
+        <div class="badge-row">
+            <span class="badge">🐍 Python 3</span>
+            <span class="badge">📄 open / with</span>
+            <span class="badge">📖 Lectura</span>
+            <span class="badge">✍️ Escritura</span>
+            <span class="badge">📦 JSON</span>
+            <span class="badge">⚙️ Binario</span>
+        </div>
+    </header>
+
+    <nav>
+        <a href="#leer-completo"><span class="nav-emoji">📖</span>Leer completo</a>
+        <a href="#leer-lineas"><span class="nav-emoji">📄</span>Línea por línea</a>
+        <a href="#escribir"><span class="nav-emoji">✍️</span>Escribir</a>
+        <a href="#append"><span class="nav-emoji">➕</span>Append</a>
+        <a href="#leer-escribir"><span class="nav-emoji">🔁</span>r+</a>
+        <a href="#binario"><span class="nav-emoji">🖼️</span>Binario</a>
+        <a href="#seek-tell"><span class="nav-emoji">🎯</span>Cursor</a>
+        <a href="#json"><span class="nav-emoji">📦</span>JSON</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- ─── LEER ARCHIVO COMPLETO ──────────── -->
+        <section id="leer-completo">
+            <h2>📖 Leer un archivo de texto completo</h2>
+            <p class="section-subtitle">La forma más directa de obtener todo el contenido</p>
+            <div class="card">
+                <p>
+                    Usar <code>with</code> es la manera <strong>recomendada</strong> porque garantiza que el archivo
+                    se cierre automáticamente, incluso si ocurre una excepción. La opción sin <code>with</code>
+                    requiere llamar a <code>.close()</code> manualmente.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>lectura_completa.py</span>
+                    </div>
+                    <pre><code><span class="hljs-comment"># Con with (recomendado)</span>
+<span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"mi_archivo.txt"</span>, <span class="hljs-string">"r"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    contenido = archivo.<span class="hljs-function">read</span>()
+    <span class="hljs-builtin">print</span>(contenido)
+
+<span class="hljs-comment"># Sin with (no recomendado, pero válido)</span>
+archivo = <span class="hljs-builtin">open</span>(<span class="hljs-string">"mi_archivo.txt"</span>, <span class="hljs-string">"r"</span>, encoding=<span class="hljs-string">"utf-8"</span>)
+contenido = archivo.<span class="hljs-function">read</span>()
+<span class="hljs-builtin">print</span>(contenido)
+archivo.<span class="hljs-function">close</span>()  <span class="hljs-comment"># Obligatorio</span></code></pre>
+                </div>
+                <div class="tip-box info">
+                    <strong>💡 Buenas prácticas:</strong> Siempre especifica el <code>encoding="utf-8"</code> para evitar
+                    errores con caracteres especiales en diferentes sistemas operativos.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── LEER LÍNEA POR LÍNEA ──────────── -->
+        <section id="leer-lineas">
+            <h2>📄 Leer línea por línea (ideal para archivos grandes)</h2>
+            <p class="section-subtitle">Iteración eficiente sin cargar todo en memoria</p>
+            <div class="card">
+                <p>
+                    Cuando procesas archivos de varios gigabytes, esta técnica es esencial. El bucle <code>for</code>
+                    lee una línea a la vez, manteniendo el uso de memoria al mínimo.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>leer_lineas.py</span>
+                    </div>
+                    <pre><code><span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"grande.txt"</span>, <span class="hljs-string">"r"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    <span class="hljs-keyword">for</span> linea <span class="hljs-keyword">in</span> archivo:  <span class="hljs-comment"># Esto lee línea a línea sin cargar todo en memoria</span>
+        <span class="hljs-builtin">print</span>(linea.<span class="hljs-function">strip</span>())  <span class="hljs-comment"># .strip() quita saltos de línea</span></code></pre>
+                </div>
+                <div class="tip-box success">
+                    <strong>⚡ Eficiencia:</strong> <code>.strip()</code> elimina espacios en blanco y saltos de línea
+                    al inicio y final. Usa <code>.rstrip()</code> si solo quieres quitar el salto de línea final.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── ESCRIBIR (SOBRESCRIBE) ────────── -->
+        <section id="escribir">
+            <h2>✍️ Escribir (sobrescribe)</h2>
+            <p class="section-subtitle">Crear un archivo nuevo o reemplazar uno existente</p>
+            <div class="card">
+                <p>
+                    El modo <code>'w'</code> <strong>borra todo el contenido anterior</strong> si el archivo ya existe.
+                    Si no existe, lo crea. Ten cuidado de no perder datos importantes.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>escribir_archivo.py</span>
+                    </div>
+                    <pre><code><span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"nuevo.txt"</span>, <span class="hljs-string">"w"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    archivo.<span class="hljs-function">write</span>(<span class="hljs-string">"Hola, este es mi primer archivo.\n"</span>)
+    archivo.<span class="hljs-function">write</span>(<span class="hljs-string">"Segunda línea.\n"</span>)
+<span class="hljs-comment"># Si el archivo existía, se borró y se creó de nuevo.</span></code></pre>
+                </div>
+                <div class="tip-box warning">
+                    <strong>⚠️ Precaución:</strong> El modo <code>'w'</code> es destructivo. Si necesitas conservar
+                    el contenido anterior, usa el modo <code>'a'</code> (append) que se explica a continuación.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── AÑADIR (APPEND) ────────────────── -->
+        <section id="append">
+            <h2>➕ Añadir (append)</h2>
+            <p class="section-subtitle">Agregar contenido al final sin borrar lo existente</p>
+            <div class="card">
+                <p>
+                    El modo <code>'a'</code> abre el archivo para escritura, pero <strong>conserva todo el contenido
+                        previo</strong> y posiciona el cursor al final. Ideal para bitácoras (logs) y registros.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>append_archivo.py</span>
+                    </div>
+                    <pre><code><span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"nuevo.txt"</span>, <span class="hljs-string">"a"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    archivo.<span class="hljs-function">write</span>(<span class="hljs-string">"Esta línea se agrega al final.\n"</span>)
+<span class="hljs-comment"># El contenido anterior se conserva.</span></code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── LEER Y ESCRIBIR A LA VEZ (r+) ── -->
+        <section id="leer-escribir">
+            <h2>🔁 Leer y escribir a la vez (r+)</h2>
+            <p class="section-subtitle">Modo dual que permite leer y modificar el mismo archivo</p>
+            <div class="card">
+                <p>
+                    El modo <code>'r+'</code> abre el archivo para lectura y escritura sin truncarlo.
+                    El cursor se posiciona al inicio, pero después de un <code>.read()</code> queda al final.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>leer_escribir.py</span>
+                    </div>
+                    <pre><code><span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"nuevo.txt"</span>, <span class="hljs-string">"r+"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    contenido = archivo.<span class="hljs-function">read</span>()  <span class="hljs-comment"># leemos todo</span>
+    archivo.<span class="hljs-function">write</span>(<span class="hljs-string">"\n--- Línea añadida desde r+ ---"</span>)  <span class="hljs-comment"># escribimos al final</span>
+<span class="hljs-comment"># Cuidado: el cursor está al final después de read(), por eso escribe ahí.</span></code></pre>
+                </div>
+                <div class="tip-box info">
+                    <strong>📌 Nota:</strong> Para escribir en una posición específica, usa <code>.seek()</code> para
+                    mover el cursor antes de escribir. Esto se explica en la sección del cursor más adelante.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── ARCHIVO BINARIO ────────────────── -->
+        <section id="binario">
+            <h2>🖼️ Archivo binario (imagen, por ejemplo)</h2>
+            <p class="section-subtitle">Transferencia byte a byte para archivos no textuales</p>
+            <div class="card">
+                <p>
+                    Los modos <code>'rb'</code> y <code>'wb'</code> permiten leer y escribir archivos binarios
+                    como imágenes, PDFs, ejecutables o cualquier formato que no sea texto plano.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>archivo_binario.py</span>
+                    </div>
+                    <pre><code><span class="hljs-comment"># Leer una imagen</span>
+<span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"foto.jpg"</span>, <span class="hljs-string">"rb"</span>) <span class="hljs-keyword">as</span> archivo_bin:
+    datos_bytes = archivo_bin.<span class="hljs-function">read</span>()
+
+<span class="hljs-comment"># Escribir una copia</span>
+<span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"copia_foto.jpg"</span>, <span class="hljs-string">"wb"</span>) <span class="hljs-keyword">as</span> copia:
+    copia.<span class="hljs-function">write</span>(datos_bytes)
+<span class="hljs-comment"># Esto crea una copia exacta byte a byte.</span></code></pre>
+                </div>
+                <div class="tip-box success">
+                    <strong>✅ Copia perfecta:</strong> Al leer y escribir en modo binario, se preserva cada byte
+                    exactamente como está. La copia será idéntica al original, sin alteraciones.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── SEEK() Y TELL() ────────────────── -->
+        <section id="seek-tell">
+            <h2>🎯 Usar .seek() y .tell() para mover el cursor</h2>
+            <p class="section-subtitle">Control preciso de la posición de lectura/escritura</p>
+            <div class="card">
+                <p>
+                    <code>.tell()</code> devuelve la posición actual del cursor en bytes.
+                    <code>.seek(offset)</code> mueve el cursor a una posición específica.
+                    Juntos permiten navegar y editar archivos en puntos concretos.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>seek_tell.py</span>
+                    </div>
+                    <pre><code><span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"nuevo.txt"</span>, <span class="hljs-string">"r+"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    <span class="hljs-builtin">print</span>(archivo.<span class="hljs-function">tell</span>())  <span class="hljs-comment"># 0 (principio)</span>
+    archivo.<span class="hljs-function">seek</span>(<span class="hljs-number">10</span>)       <span class="hljs-comment"># movemos al byte 10</span>
+    <span class="hljs-builtin">print</span>(archivo.<span class="hljs-function">tell</span>())  <span class="hljs-comment"># 10</span>
+    archivo.<span class="hljs-function">write</span>(<span class="hljs-string">"INSERTADO"</span>)
+<span class="hljs-comment"># Esto sobrescribe a partir de la posición 10.</span></code></pre>
+                </div>
+                <div class="tip-box warning">
+                    <strong>⚠️ Cuidado con la codificación:</strong> En archivos de texto con caracteres multibyte
+                    (UTF-8), mover el cursor a una posición arbitraria puede romper caracteres. Úsalo con precaución.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── JSON ────────────────────────────── -->
+        <section id="json">
+            <h2>📦 Cargar y guardar estructuras de datos con JSON</h2>
+            <p class="section-subtitle">Serialización legible para diccionarios y listas</p>
+            <div class="card">
+                <h3>🗂️ Guardar y cargar un diccionario</h3>
+                <p>
+                    JSON es el formato estándar para intercambiar datos estructurados. Con <code>json.dump()</code>
+                    guardas y con <code>json.load()</code> recuperas, manteniendo tipos como strings, números,
+                    booleanos y <code>None</code>.
+                </p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>json_diccionario.py</span>
+                    </div>
+                    <pre><code><span class="hljs-keyword">import</span> json
+
+<span class="hljs-comment"># Guardar un diccionario en un archivo .json</span>
+datos = {<span class="hljs-string">"nombre"</span>: <span class="hljs-string">"Ana"</span>, <span class="hljs-string">"edad"</span>: <span class="hljs-number">30</span>, <span class="hljs-string">"ciudad"</span>: <span class="hljs-string">"Madrid"</span>}
+<span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"datos.json"</span>, <span class="hljs-string">"w"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    json.<span class="hljs-function">dump</span>(datos, archivo, indent=<span class="hljs-number">4</span>)  <span class="hljs-comment"># indent para que sea legible</span>
+
+<span class="hljs-comment"># Cargar el diccionario desde el archivo</span>
+<span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"datos.json"</span>, <span class="hljs-string">"r"</span>, encoding=<span class="hljs-string">"utf-8"</span>) <span class="hljs-keyword">as</span> archivo:
+    datos_cargados = json.<span class="hljs-function">load</span>(archivo)
+<span class="hljs-builtin">print</span>(datos_cargados[<span class="hljs-string">"nombre"</span>])  <span class="hljs-comment"># Ana</span></code></pre>
+                </div>
+
+                <h3 style="margin-top: 1.5rem;">📋 Guardar y cargar listas</h3>
+                <p>Las listas también se serializan directamente con JSON, incluyendo tipos mixtos.</p>
+                <div class="code-block-wrapper">
+                    <div class="code-label">
+                        <span class="lang-dot">Python</span>
+                        <span>json_lista.py</span>
+                    </div>
+                    <pre><code>lista = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-string">"hola"</span>, <span class="hljs-keyword">True</span>]
+
+<span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"lista.json"</span>, <span class="hljs-string">"w"</span>) <span class="hljs-keyword">as</span> archivo:
+    json.<span class="hljs-function">dump</span>(lista, archivo)
+
+<span class="hljs-keyword">with</span> <span class="hljs-builtin">open</span>(<span class="hljs-string">"lista.json"</span>, <span class="hljs-string">"r"</span>) <span class="hljs-keyword">as</span> archivo:
+    lista_cargada = json.<span class="hljs-function">load</span>(archivo)
+<span class="hljs-builtin">print</span>(lista_cargada)  <span class="hljs-comment"># [1, 2, 3, "hola", True]</span></code></pre>
+                </div>
+                <div class="tip-box success">
+                    <strong>🌟 Legibilidad:</strong> El parámetro <code>indent=4</code> formatea el JSON con sangría,
+                    haciéndolo fácil de leer y editar manualmente si es necesario.
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── TABLA RESUMEN DE MODOS ────────── -->
+        <section id="resumen-modos">
+            <h2>📊 Tabla resumen de modos de apertura</h2>
+            <p class="section-subtitle">Referencia rápida de todos los modos vistos</p>
+            <div class="card">
+                <table class="comparison-table">
+                    <thead>
+                        <tr><th>Modo</th><th>Descripción</th><th>¿Crea archivo?</th><th>¿Borra contenido?</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>'r'</code></td><td>Lectura (texto)</td><td>No</td><td>No</td></tr>
+                        <tr><td><code>'w'</code></td><td>Escritura (sobrescribe)</td><td>Sí</td><td>Sí</td></tr>
+                        <tr><td><code>'a'</code></td><td>Añadir al final</td><td>Sí</td><td>No</td></tr>
+                        <tr><td><code>'r+'</code></td><td>Lectura y escritura</td><td>No</td><td>No</td></tr>
+                        <tr><td><code>'rb'</code></td><td>Lectura binaria</td><td>No</td><td>No</td></tr>
+                        <tr><td><code>'wb'</code></td><td>Escritura binaria</td><td>Sí</td><td>Sí</td></tr>
+                    </tbody>
+                </table>
+                <div class="tip-box info">
+                    <strong>🧠 Regla mnemotécnica:</strong> <code>r</code> = read, <code>w</code> = write,
+                    <code>a</code> = append, <code>b</code> = binary, <code>+</code> = lectura + escritura.
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>📂 <span>Manejo de Archivos en Python</span> · Guía práctica con ejemplos comentados</p>
+        <p style="margin-top:0.3rem;font-size:0.78rem;">
+            Con <code>with</code> siempre es más seguro · Domina los archivos y dominarás la persistencia de datos
+        </p>
+    </footer>
+
+    <script>
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('nav a');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 120;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
