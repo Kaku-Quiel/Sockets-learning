@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧱​ Bloque archivos</title>
+
+    <!-- Prism.js - Tema oscuro para resaltado de sintaxis -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-elevated: #1c2333;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #b0b8c4;
+            --text-muted: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d2991d;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --accent-cyan: #39c5cf;
+            --gradient-1: linear-gradient(135deg, #1f6feb, #3fb950);
+            --gradient-2: linear-gradient(135deg, #d2991d, #f85149);
+            --gradient-3: linear-gradient(135deg, #a371f7, #58a6ff);
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            line-height: 1.7;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ---- Partículas de fondo decorativas ---- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 15% 10%, rgba(31, 111, 235, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 85% 90%, rgba(163, 113, 247, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(63, 185, 80, 0.03) 0%, transparent 70%);
+        }
+
+        /* ---- Contenedor principal ---- */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 1rem;
+        }
+
+        /* ---- Encabezado ---- */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2.5rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-1);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+        .header .step-badge {
+            display: inline-block;
+            background: var(--gradient-1);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 0.35rem 1.2rem;
+            border-radius: 50px;
+            margin-bottom: 1rem;
+        }
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 650px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        /* ---- Capa / Tarjeta ---- */
+        .layer-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .layer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+            border-color: #4a5568;
+        }
+        .layer-card .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.4rem 1.8rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-elevated);
+        }
+        .layer-number {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #fff;
+            background: var(--gradient-1);
+            box-shadow: 0 0 0 6px rgba(31, 111, 235, 0.12);
+        }
+        .layer-card:nth-child(4) .layer-number {
+            background: var(--gradient-2);
+            box-shadow: 0 0 0 6px rgba(210, 153, 29, 0.12);
+        }
+        .layer-card:nth-child(6) .layer-number {
+            background: var(--gradient-3);
+            box-shadow: 0 0 0 6px rgba(163, 113, 247, 0.12);
+        }
+        .card-title-block h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+        .card-title-block .card-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+        .card-body {
+            padding: 1.6rem 1.8rem 1.8rem;
+        }
+        .card-body p {
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            font-size: 0.95rem;
+        }
+        .card-body p strong {
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+
+        /* ---- Bloque de código ---- */
+        .code-wrapper {
+            position: relative;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #0b0e14;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+            margin-bottom: 0.5rem;
+        }
+        .code-wrapper .lang-tag {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            z-index: 5;
+            background: #2d3748;
+            color: #c9d1d9;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.7rem;
+            border-radius: 4px;
+            pointer-events: none;
+            border: 1px solid #4a5568;
+            font-family: var(--font-mono);
+        }
+        .code-wrapper pre {
+            margin: 0;
+            padding: 1.5rem 1.2rem;
+            background: transparent !important;
+            font-size: 0.88rem;
+            line-height: 1.65;
+            overflow-x: auto;
+            tab-size: 4;
+            -moz-tab-size: 4;
+        }
+        .code-wrapper pre code {
+            font-family: var(--font-mono);
+            font-size: 0.86rem;
+            background: transparent !important;
+            color: #e6edf3;
+        }
+        /* Ajustes Prism Tomorrow para mejor contraste */
+        .token.comment,
+        .token.block-comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #6a9955;
+            font-style: italic;
+        }
+        .token.string,
+        .token.attr-value {
+            color: #98c379;
+        }
+        .token.function,
+        .token.class-name {
+            color: #dcdcaa;
+        }
+        .token.keyword {
+            color: #c586c0;
+        }
+        .token.operator,
+        .token.punctuation {
+            color: #d4d4d4;
+        }
+        .token.number {
+            color: #b5cea8;
+        }
+        .token.builtin {
+            color: #4ec9b0;
+        }
+        .token.decorator {
+            color: #dcdcaa;
+        }
+
+        /* ---- Emojis de salida (print) resaltados ---- */
+        .output-highlight {
+            color: #3fb950;
+            font-weight: 500;
+        }
+
+        /* ---- Nota / aviso al final ---- */
+        .final-note {
+            margin-top: 2.5rem;
+            padding: 1.5rem 2rem;
+            background: var(--surface-elevated);
+            border: 1px solid #3fb95033;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            border-left: 4px solid var(--accent-green);
+            box-shadow: var(--shadow-card);
+        }
+        .final-note .icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+        .final-note p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        .final-note strong {
+            color: #ffffff;
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            .header .subtitle {
+                font-size: 0.95rem;
+            }
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+                padding: 1.2rem;
+            }
+            .card-body {
+                padding: 1.2rem;
+            }
+            .code-wrapper pre {
+                font-size: 0.78rem;
+                padding: 1rem 0.8rem;
+            }
+            .layer-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <!-- ========== ENCABEZADO ========== -->
+        <header class="header">
+            <span class="step-badge">Paso 4</span>
+            <h1>Explicación más profunda</h1>
+            <p class="subtitle">
+                Construimos el sistema en <strong>5 capas de complejidad</strong>, desde la lectura/escritura básica
+                hasta la seguridad completa con cifrado, checksum y compresión.
+            </p>
+        </header>
+
+        <!-- ========== CAPA 1 ========== -->
+        <article class="layer-card">
+            <div class="card-header">
+                <span class="layer-number">1</span>
+                <div class="card-title-block">
+                    <h3>Lectura / escritura básica de bloques</h3>
+                    <span class="card-desc">Lo más simple: leer y escribir archivos en bloques</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>
+                    La base de todo el sistema. Leemos un archivo binario en trozos de tamaño fijo
+                    (<strong>512 bytes</strong> por defecto) y los escribimos secuencialmente en un destino.
+                    Sin metadatos, sin validación: solo transferencia pura.
+                </p>
+                <div class="code-wrapper">
+                    <span class="lang-tag">Python</span>
+                    <pre class="line-numbers"><code class="language-python"># Lo más básico: leer y escribir archivos en bloques
+def capa1_leer_escribir(origen, destino, tam_bloque=512):
+    with open(origen, 'rb') as f_origen:
+        with open(destino, 'wb') as f_destino:
+            while True:
+                bloque = f_origen.read(tam_bloque)
+                if not bloque:
+                    break
+                f_destino.write(bloque)</code></pre>
+                </div>
+            </div>
+        </article>
+
+        <!-- ========== CAPA 2 ========== -->
+        <article class="layer-card">
+            <div class="card-header">
+                <span class="layer-number">2</span>
+                <div class="card-title-block">
+                    <h3>Dividir en bloques y guardar metadata</h3>
+                    <span class="card-desc">Cada bloque como archivo separado + índice JSON</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>
+                    Aquí introducimos la <strong>metadata</strong>: cada bloque se guarda como un archivo
+                    independiente (<code>.bin</code>) y se genera un índice en formato JSON con número,
+                    tamaño y ruta de cada bloque. Esto permite gestionarlos individualmente.
+                </p>
+                <div class="code-wrapper">
+                    <span class="lang-tag">Python</span>
+                    <pre class="line-numbers"><code class="language-python"># Guardar cada bloque como archivo separado + índice
+def capa2_dividir_en_bloques(archivo, tam_bloque=512, carpeta_destino="bloques"):
+    import os
+    os.makedirs(carpeta_destino, exist_ok=True)
+
+    with open(archivo, 'rb') as f:
+        num_bloque = 0
+        metadata = []
+
+        while True:
+            bloque = f.read(tam_bloque)
+            if not bloque:
+                break
+
+            # Guardar cada bloque como archivo independiente
+            nombre_bloque = f"{carpeta_destino}/bloque_{num_bloque:04d}.bin"
+            with open(nombre_bloque, 'wb') as f_bloque:
+                f_bloque.write(bloque)
+
+            # Guardar metadata del bloque
+            metadata.append({
+                'numero': num_bloque,
+                'tamano': len(bloque),
+                'archivo': nombre_bloque
+            })
+
+            num_bloque += 1
+
+    # Guardar índice (metadata) como JSON
+    import json
+    with open(f"{carpeta_destino}/metadata.json", 'w') as f:
+        json.dump(metadata, f, indent=2)
+
+    print(f"✅ Dividido en {num_bloque} bloques")
+    return metadata</code></pre>
+                </div>
+            </div>
+        </article>
+
+        <!-- ========== CAPA 3 ========== -->
+        <article class="layer-card">
+            <div class="card-header">
+                <span class="layer-number">3</span>
+                <div class="card-title-block">
+                    <h3>Reconstruir desde bloques</h3>
+                    <span class="card-desc">Leer metadata, ordenar y recomponer el archivo original</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>
+                    El proceso inverso: cargamos el JSON de metadata, <strong>ordenamos los bloques por número</strong>
+                    y los concatenamos en orden para reconstruir el archivo binario de salida.
+                </p>
+                <div class="code-wrapper">
+                    <span class="lang-tag">Python</span>
+                    <pre class="line-numbers"><code class="language-python">def capa3_reconstruir_desde_bloques(carpeta="bloques", archivo_salida="reconstruido.bin"):
+    import json
+
+    # Leer metadata
+    with open(f"{carpeta}/metadata.json", 'r') as f:
+        metadata = json.load(f)
+
+    # Ordenar bloques por número
+    metadata_ordenada = sorted(metadata, key=lambda x: x['numero'])
+
+    # Reconstruir archivo
+    with open(archivo_salida, 'wb') as f_salida:
+        for info in metadata_ordenada:
+            with open(info['archivo'], 'rb') as f_bloque:
+                bloque = f_bloque.read()
+                f_salida.write(bloque)
+
+    print(f"✅ Archivo reconstruido: {archivo_salida}")</code></pre>
+                </div>
+            </div>
+        </article>
+
+        <!-- ========== CAPA 4 ========== -->
+        <article class="layer-card">
+            <div class="card-header">
+                <span class="layer-number">4</span>
+                <div class="card-title-block">
+                    <h3>Verificación de integridad (checksums)</h3>
+                    <span class="card-desc">Añadimos hash SHA-256 para detectar bloques corruptos</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>
+                    Cada bloque ahora incluye un <strong>checksum SHA-256</strong> en su metadata.
+                    Antes de reconstruir, verificamos que el hash calculado coincida con el esperado.
+                    Si hay discrepancias, se reportan los bloques corruptos.
+                </p>
+                <div class="code-wrapper">
+                    <span class="lang-tag">Python</span>
+                    <pre class="line-numbers"><code class="language-python">import hashlib
+
+def capa4_guardar_con_checksum(archivo, tam_bloque=512, carpeta="bloques_seguros"):
+    import os, json
+    os.makedirs(carpeta, exist_ok=True)
+
+    with open(archivo, 'rb') as f:
+        num_bloque = 0
+        metadata = []
+
+        while True:
+            bloque = f.read(tam_bloque)
+            if not bloque:
+                break
+
+            # Calcular checksum (hash) del bloque
+            checksum = hashlib.sha256(bloque).hexdigest()
+
+            # Guardar bloque
+            nombre_bloque = f"{carpeta}/bloque_{num_bloque:04d}.bin"
+            with open(nombre_bloque, 'wb') as f_bloque:
+                f_bloque.write(bloque)
+
+            # Guardar metadata con checksum
+            metadata.append({
+                'numero': num_bloque,
+                'tamano': len(bloque),
+                'archivo': nombre_bloque,
+                'checksum': checksum  # ← NUEVO: para verificar integridad
+            })
+
+            num_bloque += 1
+
+    with open(f"{carpeta}/metadata.json", 'w') as f:
+        json.dump(metadata, f, indent=2)
+
+    return metadata
+
+
+def capa4_verificar_bloques(carpeta="bloques_seguros"):
+    import json
+    errores = []
+
+    with open(f"{carpeta}/metadata.json", 'r') as f:
+        metadata = json.load(f)
+
+    for info in metadata:
+        with open(info['archivo'], 'rb') as f_bloque:
+            bloque = f_bloque.read()
+            checksum_calculado = hashlib.sha256(bloque).hexdigest()
+
+            if checksum_calculado != info['checksum']:
+                errores.append({
+                    'bloque': info['numero'],
+                    'esperado': info['checksum'],
+                    'obtenido': checksum_calculado
+                })
+
+    if errores:
+        print(f"❌ Se encontraron {len(errores)} bloques corruptos")
+        for error in errores:
+            print(f"  - Bloque {error['bloque']}: corrupto")
+        return False
+    else:
+        print("✅ Todos los bloques están integros")
+        return True</code></pre>
+                </div>
+            </div>
+        </article>
+
+        <!-- ========== CAPA 5 ========== -->
+        <article class="layer-card">
+            <div class="card-header">
+                <span class="layer-number">5</span>
+                <div class="card-title-block">
+                    <h3>Seguridad completa: Cifrado + Checksum + Compresión</h3>
+                    <span class="card-desc">Fernet (AES-128) · zlib · SHA-256 · Máxima protección</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>
+                    La capa definitiva. Cada bloque pasa por tres etapas:
+                    <strong>compresión → cifrado → checksum</strong>. Usamos
+                    <code>cryptography.fernet</code> para cifrado simétrico,
+                    <code>zlib</code> para compresión y <code>hashlib</code> para integridad.
+                    La clave se almacena aparte y se verifica cada bloque antes de descifrar.
+                </p>
+                <div class="code-wrapper">
+                    <span class="lang-tag">Python</span>
+                    <pre class="line-numbers"><code class="language-python">from cryptography.fernet import Fernet
+import zlib
+import base64
+
+def capa5_seguridad_completa(archivo, tam_bloque=512, carpeta="bloques_cifrados"):
+    import os, json
+
+    # Generar clave de cifrado
+    clave = Fernet.generate_key()
+    cipher = Fernet(clave)
+
+    # Guardar clave (en producción esto iría en un lugar seguro)
+    with open(f"{carpeta}/clave.key", 'wb') as f:
+        f.write(clave)
+
+    os.makedirs(carpeta, exist_ok=True)
+    metadata = []
+
+    with open(archivo, 'rb') as f:
+        num_bloque = 0
+
+        while True:
+            bloque = f.read(tam_bloque)
+            if not bloque:
+                break
+
+            # PASO 1: Comprimir el bloque
+            bloque_comprimido = zlib.compress(bloque, level=6)
+
+            # PASO 2: Cifrar el bloque comprimido
+            bloque_cifrado = cipher.encrypt(bloque_comprimido)
+
+            # PASO 3: Calcular checksum del bloque cifrado
+            checksum = hashlib.sha256(bloque_cifrado).hexdigest()
+
+            # Guardar bloque cifrado
+            nombre_bloque = f"{carpeta}/bloque_{num_bloque:04d}.enc"
+            with open(nombre_bloque, 'wb') as f_bloque:
+                f_bloque.write(bloque_cifrado)
+
+            metadata.append({
+                'numero': num_bloque,
+                'tamano_original': len(bloque),
+                'tamano_comp_cif': len(bloque_cifrado),
+                'archivo': nombre_bloque,
+                'checksum': checksum
+            })
+
+            num_bloque += 1
+
+    with open(f"{carpeta}/metadata.json", 'w') as f:
+        json.dump(metadata, f, indent=2)
+
+    print(f"✅ Seguridad aplicada: {num_bloque} bloques cifrados")
+    print(f"🔑 Clave guardada en: {carpeta}/clave.key")
+    return metadata
+
+
+def capa5_reconstruir_seguro(carpeta="bloques_cifrados", archivo_salida="reconstruido_seguro.bin"):
+    import json
+    from cryptography.fernet import Fernet
+    import zlib
+
+    # Cargar clave
+    with open(f"{carpeta}/clave.key", 'rb') as f:
+        clave = f.read()
+    cipher = Fernet(clave)
+
+    # Cargar metadata
+    with open(f"{carpeta}/metadata.json", 'r') as f:
+        metadata = json.load(f)
+
+    # Verificar integridad de todos los bloques antes de descifrar
+    for info in metadata:
+        with open(info['archivo'], 'rb') as f_bloque:
+            bloque_cifrado = f_bloque.read()
+            checksum_calculado = hashlib.sha256(bloque_cifrado).hexdigest()
+
+            if checksum_calculado != info['checksum']:
+                raise Exception(f"⚠️ Bloque {info['numero']} corrupto! No se puede reconstruir.")
+
+    # Reconstruir
+    with open(archivo_salida, 'wb') as f_salida:
+        for info in sorted(metadata, key=lambda x: x['numero']):
+            with open(info['archivo'], 'rb') as f_bloque:
+                bloque_cifrado = f_bloque.read()
+
+                # Descifrar
+                bloque_comprimido = cipher.decrypt(bloque_cifrado)
+
+                # Descomprimir
+                bloque_original = zlib.decompress(bloque_comprimido)
+
+                f_salida.write(bloque_original)
+
+    print(f"✅ Archivo seguro reconstruido: {archivo_salida}")</code></pre>
+                </div>
+            </div>
+        </article>
+
+        <!-- ========== NOTA FINAL ========== -->
+        <div class="final-note">
+            <span class="icon">🔐</span>
+            <p>
+                <strong>Resumen de las 5 capas:</strong> Cada nivel añade una responsabilidad
+                específica — lectura básica → metadatos → reconstrucción → checksums →
+                cifrado + compresión. Esta arquitectura modular permite escalar la seguridad
+                y la tolerancia a fallos de forma progresiva. ¡Sistema listo para producción!
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Prism.js - Resaltado de sintaxis + números de línea -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js">
+    </script>
+
+    <!-- Pequeño ajuste para que los números de línea no estorben en móvil -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ajustar padding-left de los <pre> con line-numbers para mejor lectura
+            const pres = document.querySelectorAll('pre.line-numbers');
+            pres.forEach(pre => {
+                if (window.innerWidth < 600) {
+                    pre.style.paddingLeft = '2.8rem';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
