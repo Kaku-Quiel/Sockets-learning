@@ -1,4 +1,9 @@
 import hashlib
+import random
+import string
+
+from cupshelpers import Printer
+
 
 # === CREAR ARCHIVO ===
 texto = [
@@ -37,6 +42,24 @@ def verify(bloque, hash_guardado):
     hash_calculado = hashear_bytes(bloque)
     return hash_calculado == hash_guardado
 
+def corruptBlock(block):
+    block = block.decode("utf-8")
+    caracter = random.choice(string.ascii_letters + string.digits)
+    pos = int(len(block) / 2)
+    
+    badBlock = []
+    for i in range(0, len(block) - 1):
+
+        if i == pos:
+            badBlock.append(caracter)
+            continue
+
+        badBlock.append(block[i])
+
+    return ''.join(badBlock).encode("utf-8")
+
+
+
 def leer_bloques(archivo, tam_bloque=50):
     """Lee archivo en bloques y calcula hash de cada uno"""
     lista = []
@@ -44,14 +67,24 @@ def leer_bloques(archivo, tam_bloque=50):
     with open(f"docs/{archivo}", "rb") as file:
         num_block = 1
         offset = 0
+        doIt = True
         
         while True:
             bloque = file.read(tam_bloque)
             if not bloque:
                 break
-            
-            # Calcular hash de LOS DATOS (bytes)
-            hash_block = hashear_bytes(bloque)
+
+            numero = random.randint(1, 3)
+
+            hash_block = None
+
+            if doIt and numero == 3:
+                doIt = False
+                badBlock = corruptBlock(bloque)
+                hash_block = hashear_bytes(badBlock)
+            else:                
+                # Calcular hash de LOS DATOS (bytes)
+                hash_block = hashear_bytes(bloque)
             
             # Guardar metadata
             data_block = {
