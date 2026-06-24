@@ -2,8 +2,6 @@ import hashlib
 import random
 import string
 
-from cupshelpers import Printer
-
 
 # === CREAR ARCHIVO ===
 texto = [
@@ -42,22 +40,19 @@ def verify(bloque, hash_guardado):
     hash_calculado = hashear_bytes(bloque)
     return hash_calculado == hash_guardado
 
-def corruptBlock(block):
-    block = block.decode("utf-8")
-    caracter = random.choice(string.ascii_letters + string.digits)
-    pos = int(len(block) / 2)
-    
-    badBlock = []
-    for i in range(0, len(block) - 1):
+def corruptBytes(block):
+    pos = random.randint(0, len(block) - 1)
 
-        if i == pos:
-            badBlock.append(caracter)
-            continue
+    lista_bytes = list(block)
 
-        badBlock.append(block[i])
+    while True:
+        caracter = random.randint(0, 255)
 
-    return ''.join(badBlock).encode("utf-8")
+        if caracter != lista_bytes[pos]:
+            lista_bytes[pos] = caracter
+            break
 
+    return bytes(lista_bytes)
 
 
 def leer_bloques(archivo, tam_bloque=50):
@@ -67,24 +62,13 @@ def leer_bloques(archivo, tam_bloque=50):
     with open(f"docs/{archivo}", "rb") as file:
         num_block = 1
         offset = 0
-        doIt = True
         
         while True:
             bloque = file.read(tam_bloque)
             if not bloque:
                 break
 
-            numero = random.randint(1, 3)
-
-            hash_block = None
-
-            if doIt and numero == 3:
-                doIt = False
-                badBlock = corruptBlock(bloque)
-                hash_block = hashear_bytes(badBlock)
-            else:                
-                # Calcular hash de LOS DATOS (bytes)
-                hash_block = hashear_bytes(bloque)
+            hash_block = hashear_bytes(bloque)
             
             # Guardar metadata
             data_block = {
@@ -92,20 +76,20 @@ def leer_bloques(archivo, tam_bloque=50):
                 "hash": hash_block,
                 "init_offset": offset,
                 "size": len(bloque),
-                "bits": byte_to_bits(bloque)  # Solo para mostrar
+                "bits": byte_to_bits(bloque),  # Solo para mostrar
+                "status": ""
             }
+
+            if random.randint(1, 3) == 3:
+                bloque = corruptBytes(bloque)
             
             # Verificar integridad (siempre debe ser True aquí)
-            if verify(bloque, hash_block):
-                print(f"Bloque {num_block}:")
-                print(f" Offset: {offset}")
-                print(f" Size: {len(bloque)} bytes")
-                print(f" Hash: {hash_block}")
-                print(f" Bits: {byte_to_bits(bloque)[:30]}...")  # Primeros 30 caracteres
-                print()
-                lista.append(data_block)
-            else:
-                print(f"   Bloque {num_block} CORRUPTO!")
+            data_block["status"] = "success" if verify(bloque, data_block['hash']) else "error"
+
+            lista.append(data_block)
+
+            print(data_block)
+            print()
             
             num_block += 1
             offset += len(bloque)
