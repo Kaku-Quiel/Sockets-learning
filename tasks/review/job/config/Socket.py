@@ -1,20 +1,31 @@
+from ctypes.wintypes import POINT
 import socket
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+IP = os.getenv('IP')
+PORT = int(os.getenv('PORT'))
 
 class Socket:
     @staticmethod
-    def socketServer():
+    def socketServer(listen_capacity):
         pythonSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        pythonSocket.bind(("127.0.0.1", 7000))
+        pythonSocket.bind((IP, PORT))
+        pythonSocket.listen(listen_capacity)
         return pythonSocket
     
     @staticmethod
-    def socketAccept(socketServer):
+    def socketAccept(socketServer): # Retorn a request sockets and direction 
         conn, dir = socketServer.accept()
         return conn, dir
 
     @staticmethod
     def socketClient():
-        return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        pythonSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        pythonSocket.connect((IP, PORT))
+        return pythonSocket
     
     @staticmethod
     def msgSend(_socket_, message):

@@ -6,13 +6,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 """ =========================================================================================== """
 
-from Socket import Socket
+from config.Socket import Socket, IP, PORT
 
-IP = "127.0.0.1"
-PORT = 7000
 
 socket_client = Socket.socketClient()
-# socket_client.connect((IP, PORT))
 
 def main():
     print("="*50)
@@ -24,13 +21,14 @@ def main():
     while True:
         cmd = input("cliente$: ")
 
-        if cmd == "exit":
-            print("Exit success...")
-            break
+        Socket.msgSend(socket_client, cmd)
+        response = Socket.msgRcv(socket_client)
 
-        respuesta = "error"
-        error = "tipo de error"
-        if respuesta == "error":
-            print(f"Error: {error}")
+        print(f"response: {response}")
+
+        if cmd.lower() == "exit":
+            print("Exit success...")
+            socket_client.close()
+            break
 
 main()
