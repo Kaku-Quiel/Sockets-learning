@@ -124,7 +124,6 @@ def fixDataBlock(data_block, read_size, status="success"):
 def emisor(read_size = 50, mode = "normal", error_list=[], block_list=[]):
     if mode == "normal":
         lista = []
-        errors = 0
 
         with open("docs/blocks.txt", "rb+") as file:
             num_block = 1
