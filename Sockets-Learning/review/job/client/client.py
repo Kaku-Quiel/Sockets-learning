@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """ =========================================================================================== """
 
 from config.Socket import Socket, IP, PORT
+from Function import Function
 
 
 socket_client = Socket.socketClient()
@@ -19,7 +20,7 @@ def main():
 
 
     while True:
-        cmd = input("cliente$: ")
+        cmd = input("cliente$: ").rstrip()
 
         Socket.msgSend(socket_client, cmd)
         response = Socket.msgRcv(socket_client)
@@ -28,6 +29,10 @@ def main():
             socket_client.close()
             print("Exit success...")
             break
+
+        if response == "info-c":
+            print(Function.info())
+            continue
 
         print(f"{response}")
 

@@ -2,7 +2,6 @@
 
 import sys
 import os
-from unittest import result
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 """ =========================================================================================== """
@@ -24,17 +23,32 @@ def server():
     print("="*50, end="\n\n")
 
     while True:
-        cmd = Socket.msgRcv(socket_client)
 
-        print(f"input: {cmd}")
+        cmd = Socket.msgRcv(socket_client).split()
 
-        if cmd not in Commands.command_list():
+        if len(cmd) > 2:
+            output = "Error: too many parameters"
+            Socket.msgSend(socket_client, output)
+            print(f"output: {output}")
+            continue
+
+        rcv = {
+            "cmd": cmd[0],
+            "parameter": cmd[1] if len(cmd) == 2 else "None"
+        }
+
+        if rcv["parameter"] != "None":
+            print(f"input: {rcv['cmd']} {rcv['parameter']}")
+        else:
+            print(f"input: {rcv['cmd']}")
+
+        if rcv["cmd"] not in Commands.command_list():
             output = "Error: command not found, type 'help' for commando list"
             Socket.msgSend(socket_client, output)
             print(f"output: {output}")
             continue
 
-        cmd_result = Commands.executeCMD(cmd)
+        cmd_result = Commands.executeCMD(rcv["cmd"], rcv["parameter"])
 
         if cmd_result["status"] != "success":
             output = cmd_result["value"]
@@ -49,13 +63,8 @@ def server():
         Socket.msgSend(socket_client, output)
 
         if output == "exit":
-            print("Empezando cierre de conexion...")
-
             socket_client.close()
-            print("Socket de cliente cerrado...")
-
             socket_server.close()
-            print("Socket del server cerrado...")
             print("Exit success...")
             break
 

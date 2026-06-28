@@ -1,4 +1,3 @@
-from ctypes.wintypes import POINT
 import socket
 from dotenv import load_dotenv
 import os
@@ -13,7 +12,7 @@ class Socket:
     def socketServer(listen_capacity):
         pythonSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        # Para que se pueda cerrar las conexiones simultaneamente
+        # Para que se pueda cerrar la conexion sin que hata timeout que lo inhabilite
         pythonSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
         pythonSocket.bind((IP, PORT))
