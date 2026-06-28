@@ -24,11 +24,11 @@ def main():
         Socket.msgSend(socket_client, cmd)
         response = Socket.msgRcv(socket_client)
 
-        print(f"response: {response}")
-
-        if cmd.lower() == "exit":
-            print("Exit success...")
+        if response == "exit":
             socket_client.close()
+            print("Exit success...")
             break
+
+        print(f"{response}")
 
 main()

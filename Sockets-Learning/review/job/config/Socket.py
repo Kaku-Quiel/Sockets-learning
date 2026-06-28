@@ -12,6 +12,10 @@ class Socket:
     @staticmethod
     def socketServer(listen_capacity):
         pythonSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Para que se pueda cerrar las conexiones simultaneamente
+        pythonSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
         pythonSocket.bind((IP, PORT))
         pythonSocket.listen(listen_capacity)
         return pythonSocket
