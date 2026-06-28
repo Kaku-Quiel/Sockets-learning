@@ -1,71 +1,92 @@
-""" ============== Devolverse una ruta atras para poder importar Socket.py ==================== """
-
+# Ajuste de path para importar modulos desde la raiz
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-""" =========================================================================================== """
-
 from config.Socket import Socket, IP, PORT
 from Commands import Commands
 
-
-socket_server = Socket.socketServer(1)
-
-def server():
-    print("="*50)
-    print("Server Prendido")
-    print(f"Escuchando en: {IP}: {PORT}")
-    print("="*50, end="\n\n")
-
-    socket_client, dir = Socket.socketAccept(socket_server)
-    print(f"Client connected: {dir}")
+def manejar_cliente(socket_cliente, direccion):
+    """Maneja la comunicacion con un cliente conectado."""
+    print(f"Cliente conectado: {direccion}")
     print("="*50, end="\n\n")
 
     while True:
+        try:
+            mensaje = Socket.msgRcv(socket_cliente)
+            if not mensaje:  # Cliente cerro la conexion
+                print("Cliente desconectado.")
+                break
 
-        cmd = Socket.msgRcv(socket_client).split()
+            partes = mensaje.split()
+            if len(partes) > 2:
+                output = "Error: Demasiados parametros"
+                Socket.msgSend(socket_cliente, output)
+                print(f"salida: {output}")
+                continue
 
-        if len(cmd) > 2:
-            output = "Error: too many parameters"
-            Socket.msgSend(socket_client, output)
-            print(f"output: {output}")
-            continue
+            cmd = partes[0]
+            param = partes[1] if len(partes) == 2 else "None"
 
-        rcv = {
-            "cmd": cmd[0],
-            "parameter": cmd[1] if len(cmd) == 2 else "None"
-        }
+            # Mostrar entrada
+            if param != "None":
+                print(f"entrada: {cmd} {param}")
+            else:
+                print(f"entrada: {cmd}")
 
-        if rcv["parameter"] != "None":
-            print(f"input: {rcv['cmd']} {rcv['parameter']}")
-        else:
-            print(f"input: {rcv['cmd']}")
+            # Validar comando
+            if cmd not in Commands.command_list():
+                output = "Error: comando no encontrado, escriba 'help' para lista"
+                Socket.msgSend(socket_cliente, output)
+                print(f"salida: {output}")
+                continue
 
-        if rcv["cmd"] not in Commands.command_list():
-            output = "Error: command not found, type 'help' for commando list"
-            Socket.msgSend(socket_client, output)
-            print(f"output: {output}")
-            continue
+            resultado = Commands.executeCMD(cmd, param)
+            output = resultado["value"]
 
-        cmd_result = Commands.executeCMD(rcv["cmd"], rcv["parameter"])
+            # Siempre mostrar y enviar la respuesta (sea error o éxito)
+            print(f"salida: {output}")
+            Socket.msgSend(socket_cliente, output)
 
-        if cmd_result["status"] != "success":
-            output = cmd_result["value"]
-            Socket.msgSend(socket_client, output)
-            print(f"output: {output}")
-            continue
+            # Si hubo error, saltamos el resto del bucle (incluyendo la comprobación de 'exit')
+            if resultado["status"] != "success":
+                continue
 
-        output = cmd_result["value"]
-        print(f"output: {output}")
+            # Si el comando fue 'exit', cerramos la conexión
+            if output == "exit":
+                break
 
-
-        Socket.msgSend(socket_client, output)
-
-        if output == "exit":
-            socket_client.close()
-            socket_server.close()
-            print("Exit success...")
+        except (ConnectionResetError, BrokenPipeError, RuntimeError) as e:
+            print(f"Error de comunicacion con el cliente: {e}")
             break
 
-server()
+    try:
+        socket_cliente.close()
+    except:
+        pass
+    print("Conexion cerrada.")
+
+
+def servidor():
+    """Inicia el servidor y acepta una unica conexion (como en el original)."""
+    print("="*50)
+    print("Servidor encendido")
+    print(f"Escuchando en: {IP}:{PORT}")
+    print("="*50, end="\n\n")
+
+    server_socket = Socket.socketServer(1)
+    try:
+        cliente_socket, direccion = Socket.socketAccept(server_socket)
+        manejar_cliente(cliente_socket, direccion)
+    except RuntimeError as e:
+        print(f"Error en el servidor: {e}")
+    finally:
+        try:
+            server_socket.close()
+        except:
+            pass
+        print("Servidor finalizado.")
+
+
+if __name__ == "__main__":
+    servidor()

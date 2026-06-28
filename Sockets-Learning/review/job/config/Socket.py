@@ -1,6 +1,6 @@
 import socket
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -8,33 +8,52 @@ IP = os.getenv('IP')
 PORT = int(os.getenv('PORT'))
 
 class Socket:
+    """Clase con metodos estaticos para manejo de sockets TCP/IP."""
+
     @staticmethod
     def socketServer(listen_capacity):
-        pythonSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        """Crea y retorna un socket servidor enlazado y en escucha."""
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind((IP, PORT))
+            sock.listen(listen_capacity)
+            return sock
+        except socket.error as e:
+            raise RuntimeError(f"Error al crear el servidor: {e}")
 
-        # Para que se pueda cerrar la conexion sin que hata timeout que lo inhabilite
-        pythonSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        
-        pythonSocket.bind((IP, PORT))
-        pythonSocket.listen(listen_capacity)
-        return pythonSocket
-    
     @staticmethod
-    def socketAccept(socketServer): # Retorn a request sockets and direction 
-        conn, dir = socketServer.accept()
-        return conn, dir
+    def socketAccept(server_socket):
+        """Acepta una conexion entrante y retorna (cliente_socket, direccion)."""
+        try:
+            conn, addr = server_socket.accept()
+            return conn, addr
+        except socket.error as e:
+            raise RuntimeError(f"Error al aceptar conexion: {e}")
 
     @staticmethod
     def socketClient():
-        pythonSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        pythonSocket.connect((IP, PORT))
-        return pythonSocket
-    
-    @staticmethod
-    def msgSend(_socket_, message):
-        _socket_.send(message.encode("utf-8"))
+        """Crea y retorna un socket cliente conectado al servidor."""
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((IP, PORT))
+            return sock
+        except socket.error as e:
+            raise RuntimeError(f"Error al conectar al servidor: {e}")
 
     @staticmethod
-    def msgRcv(_socket_):
-        rcv = _socket_.recv(1024)
-        return rcv.decode("utf-8")
+    def msgSend(sock, message):
+        """Envia un mensaje a traves del socket (codificado en utf-8)."""
+        try:
+            sock.send(message.encode("utf-8"))
+        except socket.error as e:
+            raise RuntimeError(f"Error al enviar mensaje: {e}")
+
+    @staticmethod
+    def msgRcv(sock):
+        """Recibe un mensaje del socket (decodificado en utf-8)."""
+        try:
+            data = sock.recv(1024)
+            return data.decode("utf-8")
+        except socket.error as e:
+            raise RuntimeError(f"Error al recibir mensaje: {e}")

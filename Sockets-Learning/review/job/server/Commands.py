@@ -1,7 +1,7 @@
 from pathlib import Path
 
-
-commands = (
+# Lista de comandos disponibles (usada para help y validacion)
+COMMANDS = (
     "help",
     "exit",
     "info",
@@ -10,110 +10,105 @@ commands = (
     "descargar"
 )
 
-""" ============================== CLASS ============================== """
-
 class Commands:
+    """Clase que maneja la ejecucion de comandos del servidor."""
 
     @staticmethod
     def command_list():
-        cmd_list = []
-
-        for i in range(len(commands)):
-            cmd_list.append(commands[i])
-
-        return cmd_list
+        """Retorna la lista de comandos como tupla."""
+        return COMMANDS
 
     @staticmethod
     def executeCMD(cmd, parameter):
-        cmd_result = {
-            "status": "error",
-            "value": "Error: Command not found"
+        """
+        Ejecuta el comando indicado con el parametro dado.
+        Retorna un diccionario con {'status': 'success'|'error', 'value': ...}
+        """
+        # Mapeo de comandos a funciones (funciones estaticas definidas abajo)
+        command_map = {
+            "exit": Commands._exit,
+            "help": Commands._help,
+            "subir": Commands._subir,
+            "descargar": Commands._descargar,
+            "info": Commands._info,
+            "info-c": Commands._info_c,
         }
-        if cmd not in commands:
-            return cmd_result
-        
-        cmd_result["status"] = "success"
-                
-        if cmd == "exit":
-            cmd_result["value"] = exit(parameter)
-            return cmd_result
-        
-        elif cmd == "help":
-            cmd_result["value"] = helpCMD(parameter)
-            return cmd_result
-        
-        elif cmd == "subir":
-            cmd_result["value"] = subirCMD(parameter)
-            return cmd_result
-        
-        elif cmd == "descargar":
-            cmd_result["value"] = descargarCMD(parameter)
-            return cmd_result
-        
-        elif cmd == "info":
-            cmd_result["value"] = infoCMD(parameter)
-            return cmd_result
-        
-        elif cmd == "info-c":
-            cmd_result["value"] = client_infoCMD(parameter)
-            return cmd_result
-        
 
-        else:
+        if cmd not in command_map:
             return {
-            "status": "Fatal",
-            "value": "Fatal"
-        }
+                "status": "error",
+                "value": "Error: Comando no encontrado"
+            }
 
-""" ============================ FUNCTIONS ============================ """
+        try:
+            result = command_map[cmd](parameter)
+            return {
+                "status": "success",
+                "value": result
+            }
+        except Exception as e:
+            # Captura cualquier error interno y lo retorna como error
+            return {
+                "status": "error",
+                "value": f"Error interno: {e}"
+            }
 
-def exit(parameter):
-    if parameter != "None":
-        return "Error: Parameter not compatible"
-    return "exit"
+    # ---------- Funciones de comando (privadas) ----------
 
-def helpCMD(parameter):
-    if parameter != "None":
-        return "Error: Parameter not compatible"
-    
-    string_command_list = "\n" + "="*50 + "\nLista de comandos\n" + "="*50 + "\n"
+    @staticmethod
+    def _exit(parameter):
+        if parameter != "None":
+            return "Error: Parametro no compatible"
+        return "exit"
 
-    for i in range(len(commands)):
-        if commands[i] == "descargar" or commands[i] == "subir":
-            string_command_list += f"-{commands[i]} archivo\n"
-        else:
-            string_command_list += f"-{commands[i]}\n"
+    @staticmethod
+    def _help(parameter):
+        if parameter != "None":
+            return "Error: Parametro no compatible"
 
-    return string_command_list
+        lines = ["", "="*50, "Lista de comandos", "="*50]
+        for cmd in COMMANDS:
+            if cmd in ("descargar", "subir"):
+                lines.append(f"-{cmd} archivo")
+            else:
+                lines.append(f"-{cmd}")
+        return "\n".join(lines)
 
-def subirCMD(parameter):
-    if parameter == "None":
-        return "Error: Parameter not Found"
+    @staticmethod
+    def _subir(parameter):
+        if parameter == "None":
+            return "Error: Parametro no encontrado"
+        # TODO: implementar subida de archivo
+        return "prueba"
 
-    return "prueba"
+    @staticmethod
+    def _descargar(parameter):
+        if parameter == "None":
+            return "Error: Parametro no encontrado"
+        # TODO: implementar descarga de archivo
+        return "prueba"
 
-def descargarCMD(parameter):
-    if parameter == "None":
-        return "Error: Parameter not Found"
+    @staticmethod
+    def _info(parameter):
+        if parameter != "None":
+            return "Error: Parametro no compatible"
 
-    return "prueba"
+        server_dir = Path("archivos_servidor")
+        if not server_dir.exists():
+            server_dir.mkdir(parents=True, exist_ok=True)
 
-def infoCMD(parameter):
-    if parameter != "None":
-        return "Error: Parameter not compatible"
+        lines = ["", "="*50, "Lista de archivos del servidor", "="*50]
+        try:
+            for i, arch in enumerate(server_dir.glob("*"), start=1):
+                lines.append(f"{i}. {arch.name}")
+        except OSError as e:
+            return f"Error al leer directorio: {e}"
 
-    string_archive_list = "\n" + "="*50 + "\nLista de archivos del servidor\n" + "="*50 + "\n"
-    i = 1
+        return "\n".join(lines)
 
-    archive_list = Path("archivos_servidor").glob("*")
-    for archive in archive_list:
-        string_archive_list += f"{i}. {archive.name}\n"
-        i += 1
-
-    return string_archive_list
-
-def client_infoCMD(parameter):
-    if parameter != "None":
-        return "Error: Parameter not compatible"
-    
-    return "info-c"
+    @staticmethod
+    def _info_c(parameter):
+        if parameter != "None":
+            return "Error: Parametro no compatible"
+        # El cliente manejara esta respuesta de forma especial
+        return "info-c"

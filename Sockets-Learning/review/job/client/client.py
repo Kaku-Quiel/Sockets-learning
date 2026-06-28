@@ -1,39 +1,55 @@
-""" ============== Devolverse una ruta atras para poder importar Socket.py ==================== """
-
+# Ajuste de path para importar modulos desde la raiz
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-""" =========================================================================================== """
-
 from config.Socket import Socket, IP, PORT
 from Function import Function
 
-
-socket_client = Socket.socketClient()
-
 def main():
+    """Bucle principal del cliente."""
     print("="*50)
     print("Bienvenido cliente")
-    print(f"Estas conectado al: {IP}: {PORT}")
+    print(f"Conectado a: {IP}:{PORT}")
     print("="*50, end="\n\n")
 
+    try:
+        socket_cliente = Socket.socketClient()
+    except RuntimeError as e:
+        print(f"Error de conexion: {e}")
+        return
 
     while True:
-        cmd = input("cliente$: ").rstrip()
+        try:
+            entrada = input("cliente$: ").rstrip()
+            if not entrada:
+                continue
 
-        Socket.msgSend(socket_client, cmd)
-        response = Socket.msgRcv(socket_client)
+            Socket.msgSend(socket_cliente, entrada)
+            respuesta = Socket.msgRcv(socket_cliente)
 
-        if response == "exit":
-            socket_client.close()
-            print("Exit success...")
+            if respuesta == "exit":
+                break
+
+            if respuesta == "info-c":
+                print(Function.info())
+                continue
+
+            print(respuesta)
+
+        except (KeyboardInterrupt, EOFError):
+            print("\nCerrando cliente...")
+            break
+        except RuntimeError as e:
+            print(f"Error de comunicacion: {e}")
             break
 
-        if response == "info-c":
-            print(Function.info())
-            continue
+    try:
+        socket_cliente.close()
+    except:
+        pass
+    print("Cliente finalizado.")
 
-        print(f"{response}")
 
-main()
+if __name__ == "__main__":
+    main()
