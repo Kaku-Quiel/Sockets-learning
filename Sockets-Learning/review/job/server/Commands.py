@@ -1,14 +1,35 @@
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from pathlib import Path
+from config.Archives import Archives
 
 # Lista de comandos disponibles (usada para help y validacion)
 COMMANDS = (
     "help",
     "exit",
-    "info",
-    "info-c",
+    "listar",
+    "listar-c",
     "subir",
     "descargar"
 )
+
+def ARCHIVE_LIST():
+    server_dir = Path("archivos_servidor")
+
+    if not server_dir.exists():
+        server_dir.mkdir(parents=True, exist_ok=True)
+
+    archives = []
+    try:
+        for arch in server_dir.glob("*"):
+            archives.append(arch.name)
+    except OSError as e:
+        return f"Error al leer directorio: {e}"
+    
+    return archives
 
 class Commands:
     """Clase que maneja la ejecucion de comandos del servidor."""
@@ -30,8 +51,8 @@ class Commands:
             "help": Commands._help,
             "subir": Commands._subir,
             "descargar": Commands._descargar,
-            "info": Commands._info,
-            "info-c": Commands._info_c,
+            "listar": Commands._listar,
+            "listar-c": Commands._listar_c,
         }
 
         if cmd not in command_map:
@@ -77,19 +98,24 @@ class Commands:
     @staticmethod
     def _subir(parameter):
         if parameter == "None":
-            return "Error: Parametro no encontrado"
+            return "Error: No hay archivo seleccionado"
         # TODO: implementar subida de archivo
         return "prueba"
 
     @staticmethod
     def _descargar(parameter):
         if parameter == "None":
-            return "Error: Parametro no encontrado"
-        # TODO: implementar descarga de archivo
-        return "prueba"
+            return "Error: No hay archivo seleccionado"
+        
+        if parameter not in ARCHIVE_LIST():
+            return "Error: Archivo no encotrador"
+        
+        data_block_list = Archives.load_archive(parameter, side="server")
+        return data_block_list
+            
 
     @staticmethod
-    def _info(parameter):
+    def _listar(parameter):
         if parameter != "None":
             return "Error: Parametro no compatible"
 
@@ -107,7 +133,7 @@ class Commands:
         return "\n".join(lines)
 
     @staticmethod
-    def _info_c(parameter):
+    def _listar_c(parameter):
         if parameter != "None":
             return "Error: Parametro no compatible"
         # El cliente manejara esta respuesta de forma especial

@@ -40,12 +40,45 @@ def manejar_cliente(socket_cliente, direccion):
                 Socket.msgSend(socket_cliente, output)
                 print(f"salida: {output}")
                 continue
+            
 
             resultado = Commands.executeCMD(cmd, param)
             output = resultado["value"]
+            
+
+            if cmd == "descargar":
+                try:
+                    print("bloques:\n")
+
+                    lista_data_block = output.split("||")
+                    for i in range(len(lista_data_block) - 1):
+                        json_data_block = lista_data_block[i].split("//")
+                        
+                        number = json_data_block[0]
+                        hash = json_data_block[1]
+                        bits = json_data_block[2]
+                        offset = json_data_block[3]
+                        size = json_data_block[4]
+                        status = json_data_block[5]
+
+                        print(number)
+                        print(f" {hash}")
+                        print(f" {bits}")
+                        print(f" {offset}")
+                        print(f" {size}")
+                        print(f" {status}")
+                        print()
+                except:
+                    print("HOLA PAPU")
+                finally:
+                    Socket.msgSend(socket_cliente, output)
+            else:
+                print(f"salida: {output}")
+
+
 
             # Siempre mostrar y enviar la respuesta (sea error o éxito)
-            print(f"salida: {output}")
+            # print(f"salida: {output}")
             Socket.msgSend(socket_cliente, output)
 
             # Si hubo error, saltamos el resto del bucle (incluyendo la comprobación de 'exit')

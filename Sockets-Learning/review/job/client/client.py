@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.Socket import Socket, IP, PORT
 from Function import Function
+from config.Archives import Archives
 
 def main():
     """Bucle principal del cliente."""
