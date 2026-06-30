@@ -1,6 +1,8 @@
 # Ajuste de path para importar modulos desde la raiz
+from asyncio import as_completed
 import sys
 import os
+from urllib import response
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.Socket import Socket, IP, PORT
@@ -42,34 +44,61 @@ def manejar_cliente(socket_cliente, direccion):
                 print(f"salida: {output}")
                 continue
             
-
+            """ =========== EXECUTE CMD =========== """
             resultado = Commands.executeCMD(cmd, param)
+            """ =================================== """
+
             output = resultado["value"]
             
-            if cmd == "descargar":
-                print("bloques:\n")
-                
-
-                lista_data_block = output.split("||")
-                for i in range(len(lista_data_block) - 1):
-                    Archives.printDataBlock(lista_data_block[i])
-                
-                print(f"Bytes: {len(output)}")
-                
-                output = f"descargar{output}"
-
-            else:
-                print(f"salida: {output}")
-
-            Socket.msgSend(socket_cliente, output)
-
-            # Si hubo error, saltamos el resto del bucle (incluyendo la comprobación de 'exit')
             if resultado["status"] != "success":
+                print(f"salida: {output}")
+                Socket.msgSend(socket_cliente, output)
                 continue
 
-            # Si el comando fue 'exit', cerramos la conexión
+            if output[:len("error")].lower() == "error":
+                print(f"salida: {output}")
+                Socket.msgSend(socket_cliente, output)
+                continue
+
             if output == "exit":
+                Socket.msgSend(socket_cliente, output)
                 break
+
+            if cmd == "descargar":
+                weight_separate = output.split("||")
+                weight_file = weight_separate[0]
+                weight_transfer = weight_separate[1]
+                
+                output = f"Descargar: {weight_file} bytes\nTransferir: {weight_transfer} bytes"
+                print(f"salida:\n{output}")
+
+                Socket.msgSend(socket_cliente, output)
+                respuesta = Socket.msgRcv(socket_cliente)
+
+                print(f"entrada: {respuesta}")
+                
+                if respuesta == "n" or respuesta != "s":
+                    Socket.msgSend(socket_cliente, "cancel")
+                    print("salida: cancel")
+                    continue
+
+                Socket.msgSend(socket_cliente, "continue")
+                print("salida: continue",end="\n\n")
+
+                while True:
+                    str_i = Socket.msgRcv(socket_cliente)
+                    i = int(str_i) + 1
+                    Socket.msgSend(socket_cliente, str(i))
+                    print(f"Mandando archivo: {i}")
+                    
+                    if i >= 99999:
+                        print("finish")
+                        break
+
+                continue
+
+            print(f"salida: {output}")
+            Socket.msgSend(socket_cliente, output)
 
         except (ConnectionResetError, BrokenPipeError, RuntimeError) as e:
             print(f"Error de comunicacion con el cliente: {e}")

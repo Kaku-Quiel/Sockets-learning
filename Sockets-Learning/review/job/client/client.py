@@ -21,7 +21,6 @@ def main():
         return
 
     while True:
-        respuesta = ""
         try:
             entrada = input("cliente$: ").rstrip()
             if not entrada:
@@ -37,9 +36,39 @@ def main():
                 print(Function.listar_c())
                 continue
 
-            elif respuesta[:len("descargar")] == "descargar":
-                print("Descargando...")
-                continue
+            elif respuesta[:len("Descargar")] == "Descargar":
+                print(respuesta)
+
+                posible_response = ['s', 'n']
+                while True:
+                    descargar = input("Descargar (S/n): ").lower()
+
+                    if descargar in posible_response:
+                        Socket.msgSend(socket_cliente, descargar)
+                        break
+
+                    print("Escriba la letra 'S' para descargar o la 'N' para no descargar")
+
+                respuesta = Socket.msgRcv(socket_cliente)
+
+                if respuesta == "cancel" or respuesta != "continue":
+                    continue
+                
+                print("Descargando...",end="\n\n")
+
+                i = 0
+                while True:
+                    Socket.msgSend(socket_cliente, str(i))
+                    str_i = Socket.msgRcv(socket_cliente)
+                    i = int(str_i)
+
+                    print(f"descargando archivo: {i}")
+
+                    if i >= 99999:
+                        print(f"finish")
+                        break
+                    
+
 
             else:
                 print(respuesta)

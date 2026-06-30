@@ -1,4 +1,5 @@
 import hashlib
+import re
 
 class Archives:
     @staticmethod
@@ -49,38 +50,67 @@ class Archives:
             return f"Error archivos: {e}"
         
     @staticmethod
+    def request_download(archive, side):
+        dir = "ERROR"
+        if side == "server":
+            dir = "../server/archivos_servidor"
+        elif side == "client":
+            dir = "../client/archivos_cliente"
+
+        if dir == "ERROR":
+            return "Error de sistema: no hay especificacion de directorio de archivo"
+        
+        _SIZE_READ_ = 1024
+        try:
+            with open(f"{dir}/{archive}", "rb+") as file:
+                number = 1
+                offset = 0
+
+                string_data_block = ""
+
+                while True:
+                    block = file.read(_SIZE_READ_)
+                    if not block:
+                        break
+                    
+                    hashblock = Archives._hashblock(block)
+                    size = len(block)
+
+                    string_data_block += f"{number}"
+                    string_data_block += "//" + f"{hashblock}"
+                    string_data_block += "//" + f"{block}"
+                    string_data_block += "//" + f"{offset}"
+                    string_data_block += "//" + f"{size}"
+                    string_data_block += "//" + f"success"
+
+                    string_data_block += "||" # Final del data_block
+
+                    number += 1
+                    offset += size
+
+                file.seek(0)
+                weight_file = len(file.read())
+                weight_transfer = len(string_data_block)
+
+                return f"{weight_file}||{weight_transfer}"
+
+            return "Error request: como coño llegue aqui"
+        except Exception as e:
+            return f"Error request: {e}"
+        
+    @staticmethod
     def _hashblock(block):
             hashblock = hashlib.sha256(block)
             return hashblock.hexdigest()
     
     @staticmethod
-    def _bitsblock(block_or_bits, mode="neutral"):
-            if mode == "neutral":
-                block = block_or_bits
+    def _verify_hash(string_data_block):
+        separate_data_block = string_data_block.split("//")
 
-                bits = []
-                for byte in block:
-                    bits.append(format(byte, '08b'))
-                return " ".join(bits)
-            
-            if mode == "reverse":
-                bits = block_or_bits
-                lista_str_bytes = bits.split(bits)
+        hashblock = separate_data_block[1]
+        block = separate_data_block[2]
 
-                lista_int_bytes = []
-
-                for str_byte in lista_str_bytes:
-                    lista_int_bytes.append(int(str_byte, 2))
-
-                return bytes(lista_int_bytes)
-            
-            return "ERROR: no se encontro un modo para la conversion"
-        
-
-    
-    @staticmethod
-    def _verify_hash(data_block):
-        return "True"
+        return hashblock == Archives._hashblock(block)
     
     @staticmethod
     def printDataBlock(data_block):

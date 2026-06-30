@@ -104,13 +104,14 @@ class Commands:
 
     @staticmethod
     def _descargar(parameter):
+
         if parameter == "None":
             return "Error: No hay archivo seleccionado"
         
         if parameter not in ARCHIVE_LIST():
             return "Error: Archivo no encotrador"
         
-        data_block_list = Archives.load_archive(parameter, side="server")
+        data_block_list = Archives.request_download(parameter,side="server")
         return data_block_list
             
 
