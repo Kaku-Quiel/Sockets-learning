@@ -21,6 +21,7 @@ def main():
         return
 
     while True:
+        respuesta = ""
         try:
             entrada = input("cliente$: ").rstrip()
             if not entrada:
@@ -32,11 +33,16 @@ def main():
             if respuesta == "exit":
                 break
 
-            if respuesta == "info-c":
-                print(Function.info())
+            elif respuesta == "listar-c":
+                print(Function.listar_c())
                 continue
 
-            print(respuesta)
+            elif respuesta[:len("descargar")] == "descargar":
+                print("Descargando...")
+                continue
+
+            else:
+                print(respuesta)
 
         except (KeyboardInterrupt, EOFError):
             print("\nCerrando cliente...")

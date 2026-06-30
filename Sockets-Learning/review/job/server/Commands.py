@@ -137,4 +137,4 @@ class Commands:
         if parameter != "None":
             return "Error: Parametro no compatible"
         # El cliente manejara esta respuesta de forma especial
-        return "info-c"
+        return "listar-c"

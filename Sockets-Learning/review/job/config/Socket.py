@@ -53,7 +53,7 @@ class Socket:
     def msgRcv(sock):
         """Recibe un mensaje del socket (decodificado en utf-8)."""
         try:
-            data = sock.recv(1024)
+            data = sock.recv(1048576)
             return data.decode("utf-8")
         except socket.error as e:
             raise RuntimeError(f"Error al recibir mensaje: {e}")

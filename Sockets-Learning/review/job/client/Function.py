@@ -4,7 +4,7 @@ class Function:
     """Funciones auxiliares para el cliente."""
 
     @staticmethod
-    def info():
+    def listar_c():
         """
         Retorna un listado formateado de los archivos en 'archivos_cliente'.
         Crea el directorio si no existe.

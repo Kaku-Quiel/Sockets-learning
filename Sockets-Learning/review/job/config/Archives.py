@@ -12,11 +12,12 @@ class Archives:
         if dir == "ERROR":
             return "Error de sistema: no hay especificacion de directorio de archivo"
         
-        _SIZE_READ_ = 5
+        _SIZE_READ_ = 100
         try:
             with open(f"{dir}/{archive}", "rb+") as file:
                 number = 1
                 offset = 0
+
 
                 string_data_block = ""
 
@@ -26,15 +27,14 @@ class Archives:
                         break
                     
                     hashblock = Archives._hashblock(block)
-                    bitsblock = Archives._bitsblock(block, mode="neutral")
                     size = len(block)
 
-                    string_data_block +=       "number:" + f"{number}"
-                    string_data_block += "//" + "hash:"   + f"{hashblock}"
-                    string_data_block += "//" + "bits:"   + f"{bitsblock}"
-                    string_data_block += "//" + "offset:" + f"{offset}"
-                    string_data_block += "//" + "size:"   + f"{size}"
-                    string_data_block += "//" + "status:" + f"success"
+                    string_data_block += f"{number}"
+                    string_data_block += "//" + f"{hashblock}"
+                    string_data_block += "//" + f"{block}"
+                    string_data_block += "//" + f"{offset}"
+                    string_data_block += "//" + f"{size}"
+                    string_data_block += "//" + f"success"
 
                     string_data_block += "||" # Final del data_block
 
@@ -81,3 +81,23 @@ class Archives:
     @staticmethod
     def _verify_hash(data_block):
         return "True"
+    
+    @staticmethod
+    def printDataBlock(data_block):
+        json_block = data_block.split("//")
+
+        number = json_block[0]
+        hash = json_block[1]
+        bits = json_block[2]
+        offset = json_block[3]
+        size = json_block[4]
+        status = json_block[5]
+
+        string_data_block = f"Block: {number}\n"
+        string_data_block += f"  Hash: {hash[:15]}...\n"
+        string_data_block += f"  Bits: {bits[:15]}...\n"
+        string_data_block += f"  Offset: {offset}\n"
+        string_data_block += f"  Size: {size}\n"
+        string_data_block += f"  status: {status}\n"
+
+        print(string_data_block)
